@@ -1,0 +1,4 @@
+---
+# Variables por defecto para el rol nginx
+nginx_port: 80
+nodejs_port: 3000

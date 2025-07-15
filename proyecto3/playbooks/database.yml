@@ -1,0 +1,69 @@
+---
+# Playbook para configurar PostgreSQL
+- name: Configurar servidor de base de datos PostgreSQL
+  hosts: databases
+  become: yes
+  gather_facts: yes
+
+  tasks:
+    - name: Actualizar cache de paquetes
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+
+    - name: Instalar PostgreSQL y dependencias
+      apt:
+        name:
+          - postgresql
+          - postgresql-contrib
+          - python3-psycopg2
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Asegurar que PostgreSQL esté ejecutándose
+      systemd:
+        name: postgresql
+        state: started
+        enabled: yes
+
+    - name: Crear usuario de base de datos
+      postgresql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+        state: present
+      become_user: postgres
+
+    - name: Crear base de datos
+      postgresql_db:
+        name: "{{ db_name }}"
+        owner: "{{ db_user }}"
+        state: present
+      become_user: postgres
+
+    - name: Configurar PostgreSQL - postgresql.conf
+      copy:
+        src: ../files/postgresql.conf
+        dest: /etc/postgresql/12/main/postgresql.conf
+        backup: yes
+      notify: restart postgresql
+
+    - name: Configurar PostgreSQL - pg_hba.conf
+      copy:
+        src: ../files/pg_hba.conf
+        dest: /etc/postgresql/12/main/pg_hba.conf
+        backup: yes
+      notify: restart postgresql
+
+    - name: Abrir puerto de PostgreSQL en firewall (si está activo)
+      ufw:
+        rule: allow
+        port: "{{ db_port }}"
+        proto: tcp
+      ignore_errors: yes
+
+  handlers:
+    - name: restart postgresql
+      systemd:
+        name: postgresql
+        state: restarted

@@ -1,0 +1,28 @@
+---
+- name: Instalar paquetes necesarios para Node.js
+  ansible.builtin.apt:
+    name: 
+      - nodejs
+      - npm
+      - git
+      - curl
+      - vim
+    state: latest
+  when: ansible_os_family == "Debian"
+
+- name: Clonar repositorio de Node.js Hello World API
+  ansible.builtin.git:
+    repo: 'https://github.com/yosoyfunes/nodejs-helloworld-api.git'
+    dest: "{{ app_dir }}"
+    force: yes
+
+- name: Instalar dependencias de Node.js
+  command: npm install
+  args:
+    chdir: "{{ app_dir }}" 
+
+- name: Instalar pm2 globalmente
+  npm:
+    name: pm2
+    global: yes
+    state: present

@@ -1,0 +1,59 @@
+---
+- name: Instalar supervisor
+  ansible.builtin.apt:
+    name: supervisor
+    state: present
+    update_cache: yes
+
+- name: Crear configuración de supervisor para nginx y node
+  ansible.builtin.copy:
+    dest: /etc/supervisor/conf.d/nginx_node.conf
+    content: |
+      [program:nginx]
+      command=/usr/sbin/nginx -g 'daemon off;'
+      autorestart=true
+      priority=10
+
+      [program:nodeapp]
+      command=/usr/local/bin/pm2-runtime start {{ app_dir }}/index.js --name hello-api
+      directory={{ app_dir }}
+      autorestart=true
+      priority=20
+  notify: 
+    - restart supervisor
+    - reload supervisor config
+
+- name: Asegurar que supervisord esté corriendo
+  shell: supervisord -c /etc/supervisor/supervisord.conf
+  args:
+    creates: /var/run/supervisord.pid
+
+- name: Recargar configuración de supervisor
+  command: supervisorctl reread
+
+- name: Aplicar nueva configuración
+  command: supervisorctl update
+
+- name: Iniciar todos los servicios de supervisor
+  command: supervisorctl start all
+
+- name: Esperar a que Node.js esté listo
+  pause:
+    seconds: 5
+    prompt: "Esperando a que Node.js se inicialice..."
+
+- name: Verificar que Node.js esté respondiendo
+  uri:
+    url: "http://localhost:3000/"
+    method: GET
+    status_code: 200
+  retries: 5
+  delay: 10
+
+- name: Verificar que Nginx esté respondiendo
+  uri:
+    url: "http://localhost:80/"
+    method: GET
+    status_code: 200
+  retries: 5
+  delay: 5

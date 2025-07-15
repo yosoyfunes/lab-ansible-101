@@ -1,0 +1,28 @@
+---
+- name: Instalar Nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: latest
+  when: ansible_os_family == "Debian"
+
+- name: Copiar archivo de configuracion de nginx
+  ansible.builtin.copy:
+    src: nginx.conf
+    dest: /etc/nginx/nginx.conf
+    backup: yes
+  notify: restart nginx
+
+- name: Eliminar configuración por defecto de Nginx
+  file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: restart nginx
+
+- name: Verificar configuración de Nginx
+  command: nginx -t
+  register: nginx_syntax
+  changed_when: false
+
+- name: Mostrar resultado de verificación de Nginx
+  debug:
+    var: nginx_syntax.stdout_lines

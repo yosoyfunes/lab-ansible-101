@@ -1,0 +1,42 @@
+---
+- name: Desplegar Hello World API (Nginx + Node JS) usando Roles
+  hosts: servers
+  become: true
+  gather_facts: yes
+
+  vars:
+    app_dir: /home/ubuntu/nodejs-helloworld-api
+
+  tasks:
+    - name: Mostrar información del servidor
+      debug:
+        msg:
+          - "=== Configurando servidor {{ inventory_hostname }} ==="
+          - "IP: {{ ansible_host }}"
+          - "Sistema: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+
+    - name: Actualizar cache de paquetes
+      ansible.builtin.apt:
+        name: '*'
+        state: latest
+      when: ansible_os_family == "Debian"
+
+  roles:
+    - nginx
+    - nodejs
+    - supervisor
+
+  post_tasks:
+    - name: Mostrar resultado final
+      debug:
+        msg:
+          - "=== DESPLIEGUE COMPLETADO EXITOSAMENTE ==="
+          - "🌐 Servidor: {{ ansible_host }}"
+          - "⚙️  Node.js API ejecutándose en puerto 3000"
+          - "🌐 Nginx proxy ejecutándose en puerto 80"
+          - ""
+          - "🚀 Accede a la aplicación en: http://{{ ansible_host }}"
+          - ""
+          - "Para probar:"
+          - "  curl http://{{ ansible_host }}/"
+          - "  curl http://{{ ansible_host }}/nginx-health"

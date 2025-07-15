@@ -1,0 +1,20 @@
+[Unit]
+Description=Gunicorn instance to serve todo-app
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/todo-app
+Environment="PATH=/opt/todo-app/venv/bin"
+Environment="DB_HOST=192.168.1.12"
+Environment="DB_NAME=todoapp"
+Environment="DB_USER=todouser"
+Environment="DB_PASSWORD=todopass123"
+Environment="DB_PORT=5432"
+ExecStart=/opt/todo-app/venv/bin/gunicorn --workers 3 --bind 0.0.0.0:5000 app:app
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

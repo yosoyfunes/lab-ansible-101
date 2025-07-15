@@ -1,0 +1,4 @@
+---
+# Variables por defecto para el rol nodejs
+app_dir: /home/ubuntu/nodejs-helloworld-api
+nodejs_port: 3000
