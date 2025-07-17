@@ -1,9 +1,0 @@
----
-# Variables globales para todos los servidores
-app_name: "todo-app"
-app_version: "1.0"
-
-# Base de datos
-db_name: "todoapp"
-db_user: "todouser"
-db_password: "todopass123"

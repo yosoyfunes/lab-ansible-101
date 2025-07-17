@@ -1,3 +1,0 @@
----
-# Variables específicas para servidores web
-nginx_user: "www-data"

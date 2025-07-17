@@ -1,3 +1,0 @@
----
-# Variables específicas para servidores de base de datos
-postgresql_version: "12"

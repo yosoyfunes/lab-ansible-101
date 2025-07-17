@@ -1,9 +1,0 @@
----
-# Variables específicas para servidores de aplicación
-python_version: "3.8"
-
-# Paquetes Python requeridos
-python_packages:
-  - flask
-  - psycopg2-binary
-  - gunicorn
